@@ -6,56 +6,121 @@ import org.example.model.Client;
 import org.example.model.Planet;
 import org.example.service.ClientCrudService;
 import org.example.service.PlanetCrudService;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestCrudOperations {
-    public static void main(String[] args) {
-        ClientCrudService clientService = new ClientCrudService();
-        PlanetCrudService planetService = new PlanetCrudService();
 
-        // Test creating clients
-        Client client1 = new Client();
-        client1.setName("Test Client 1");
-        clientService.createClient(client1);
+    private ClientCrudService clientService;
+    private PlanetCrudService planetService;
 
-        Client client2 = new Client();
-        client2.setName("Test Client 2");
-        clientService.createClient(client2);
+    @BeforeAll
+    public void setup() {
+        clientService = new ClientCrudService();
+        planetService = new PlanetCrudService();
+    }
 
-        // Test retrieving all clients
-        System.out.println("All Clients: " + clientService.getAllClients());
+    @BeforeEach
+    public void prepareDatabase() {
+        // Cleanup database before each test
+        Flyway flyway = Flyway.configure().dataSource("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "").load();
+        flyway.clean();
+        flyway.migrate();
+    }
 
-        // Test updating a client
-        client1.setName("Updated Client 1");
-        clientService.updateClient(client1);
+    @Test
+    public void testCreateAndRetrieveClient() {
+        Client client = new Client();
+        client.setName("Test Client");
+        clientService.createClient(client);
 
-        // Test retrieving a single client
-        System.out.println("Client with ID 1: " + clientService.getClient(client1.getId()));
+        Client retrievedClient = clientService.getClient(client.getId());
+        assertNotNull(retrievedClient);
+        assertEquals("Test Client", retrievedClient.getName());
+    }
 
-        // Test deleting a client
-        clientService.deleteClient(client2.getId());
+    @Test
+    public void testUpdateClient() {
+        Client client = new Client();
+        client.setName("Test Client");
+        clientService.createClient(client);
 
-        // Test creating planets
-        Planet planet1 = new Planet();
-        planet1.setId("NEP");
-        planet1.setName("Neptune");
-        planetService.createPlanet(planet1);
+        client.setName("Updated Client");
+        clientService.updateClient(client);
 
-        Planet planet2 = new Planet();
-        planet2.setId("PLU");
-        planet2.setName("Pluto");
-        planetService.createPlanet(planet2);
+        Client retrievedClient = clientService.getClient(client.getId());
+        assertNotNull(retrievedClient);
+        assertEquals("Updated Client", retrievedClient.getName());
+    }
 
-        // Test retrieving all planets
-        System.out.println("All Planets: " + planetService.getAllPlanets());
+    @Test
+    public void testDeleteClient() {
+        Client client = new Client();
+        client.setName("Test Client");
+        clientService.createClient(client);
 
-        // Test updating a planet
-        planet1.setName("Updated Neptune");
-        planetService.updatePlanet(planet1);
+        clientService.deleteClient(client.getId());
 
-        // Test retrieving a single planet
-        System.out.println("Planet with ID NEP: " + planetService.getPlanet(planet1.getId()));
+        Client retrievedClient = clientService.getClient(client.getId());
+        assertNull(retrievedClient);
+    }
 
-        // Test deleting a planet
-        planetService.deletePlanet(planet2.getId());
+    @Test
+    public void testCreateAndRetrievePlanet() {
+        Planet planet = new Planet();
+        planet.setId("MARS");
+        planet.setName("Mars");
+        planetService.createPlanet(planet);
+
+        Planet retrievedPlanet = planetService.getPlanet(planet.getId());
+        assertNotNull(retrievedPlanet);
+        assertEquals("Mars", retrievedPlanet.getName());
+    }
+
+    @Test
+    public void testInvalidPlanetId() {
+        Planet planet = new Planet();
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            planet.setId("mars123");
+        });
+
+        String expectedMessage = "Planet ID must consist of uppercase letters and digits only.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testUpdatePlanet() {
+        Planet planet = new Planet();
+        planet.setId("MARS");
+        planet.setName("Mars");
+        planetService.createPlanet(planet);
+
+        planet.setName("Updated Mars");
+        planetService.updatePlanet(planet);
+
+        Planet retrievedPlanet = planetService.getPlanet(planet.getId());
+        assertNotNull(retrievedPlanet);
+        assertEquals("Updated Mars", retrievedPlanet.getName());
+    }
+
+    @Test
+    public void testDeletePlanet() {
+        Planet planet = new Planet();
+        planet.setId("MARS");
+        planet.setName("Mars");
+        planetService.createPlanet(planet);
+
+        planetService.deletePlanet(planet.getId());
+
+        Planet retrievedPlanet = planetService.getPlanet(planet.getId());
+        assertNull(retrievedPlanet);
     }
 }

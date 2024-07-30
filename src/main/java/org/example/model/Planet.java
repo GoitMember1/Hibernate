@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.regex.Pattern;
+
 @Entity
 @Table(name = "planet")
 public class Planet {
@@ -14,11 +16,17 @@ public class Planet {
 
     @Column(nullable = false, length = 500)
     private String name;
+
+    private static final Pattern ID_PATTERN = Pattern.compile("^[A-Z0-9]+$");
+
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
+        if (!ID_PATTERN.matcher(id).matches()) {
+            throw new IllegalArgumentException("Planet ID must consist of uppercase letters and digits only.");
+        }
         this.id = id;
     }
 
