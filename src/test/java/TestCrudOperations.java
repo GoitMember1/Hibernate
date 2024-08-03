@@ -24,10 +24,7 @@ public class TestCrudOperations {
 
     @BeforeEach
     public void prepareDatabase() {
-        Flyway flyway = Flyway.configure()
-                .dataSource("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "")
-                .cleanDisabled(false)  // Allow clean
-                .load();
+        Flyway flyway = Flyway.configure().dataSource("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "").load();
         flyway.clean();
         flyway.migrate();
 
