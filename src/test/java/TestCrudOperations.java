@@ -1,7 +1,3 @@
-package org.example;
-
-
-
 import org.example.model.Client;
 import org.example.model.Planet;
 import org.example.service.ClientCrudService;
@@ -28,10 +24,13 @@ public class TestCrudOperations {
 
     @BeforeEach
     public void prepareDatabase() {
-        // Cleanup database before each test
-        Flyway flyway = Flyway.configure().dataSource("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "").load();
+        Flyway flyway = Flyway.configure()
+                .dataSource("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "")
+                .cleanDisabled(false)  // Allow clean
+                .load();
         flyway.clean();
         flyway.migrate();
+
     }
 
     @Test
@@ -90,7 +89,7 @@ public class TestCrudOperations {
             planet.setId("mars123");
         });
 
-        String expectedMessage = "Planet ID must consist of uppercase letters and digits only.";
+        String expectedMessage = "Planet ID must consist of uppercase letters only.";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));

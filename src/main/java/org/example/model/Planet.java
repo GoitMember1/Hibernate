@@ -17,7 +17,7 @@ public class Planet {
     @Column(nullable = false, length = 500)
     private String name;
 
-    private static final Pattern ID_PATTERN = Pattern.compile("^[A-Z0-9]+$");
+    private static final Pattern ID_PATTERN = Pattern.compile("^[A-Z0]+$");
 
     public String getId() {
         return id;
@@ -25,7 +25,7 @@ public class Planet {
 
     public void setId(String id) {
         if (!ID_PATTERN.matcher(id).matches()) {
-            throw new IllegalArgumentException("Planet ID must consist of uppercase letters and digits only.");
+            throw new IllegalArgumentException("Planet ID must consist of uppercase letters only.");
         }
         this.id = id;
     }

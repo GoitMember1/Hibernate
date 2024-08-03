@@ -12,8 +12,9 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <mapping class="com.spacetravel.model.Client"/>
-        <mapping class="com.spacetravel.model.Planet"/>
-        <mapping class="com.spacetravel.model.Ticket"/>
+        <mapping class="org.example.model.Client"/>
+        <mapping class="org.example.model.Planet"/>
+        <mapping class="org.example.model.Ticket"/>
+
     </session-factory>
 </hibernate-configuration>
